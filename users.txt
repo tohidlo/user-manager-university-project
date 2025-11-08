@@ -1,2 +1,2 @@
-amir2|amir@tohidlo.com
-Persian|pars@gg.com
+amir|amir@tohidlo.com
+omid|damavand@gg.com
