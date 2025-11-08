@@ -6,9 +6,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     if (!empty($name) && !empty($email)) {
-        addUser($file, $name, $email);
-        header("Location: index.php");
-        exit;
+        if ($pdo === null) {
+            $message = 'database connection failed. check functions.php.';
+        } else {
+            try {
+                addUser($pdo, $name, $email);
+                header("Location: index.php");
+                exit;
+            } catch (PDOException $e) {
+                $message = 'error adding user: ' . $e->getMessage();
+            }
+        }
     } else {
         $message = 'please enter name and email.';
     }

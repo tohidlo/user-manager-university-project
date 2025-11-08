@@ -2,13 +2,23 @@
 include 'functions.php';
 
 if (isset($_GET['delete'])) {
-    $delete_index = (int)$_GET['delete'];
-    deleteUser($file, $delete_index);
+    $delete_id = (int)$_GET['delete'];
+    if ($delete_id > 0 && $pdo !== null) {
+        try {
+            deleteUser($pdo, $delete_id);
+        } catch (PDOException $e) {
+            // log
+        }
+    }
     header("Location: index.php");
     exit;
 }
 
-$users = getUsers($file);
+if ($pdo === null) {
+    die("database connection failed. check functions.php.");
+}
+
+$users = getUsers($pdo);
 ?>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -27,13 +37,13 @@ $users = getUsers($file);
     <?php if (empty($users)): ?>
         <tr><td colspan="3">no users found.</td></tr>
     <?php else: ?>
-        <?php foreach ($users as $index => $user): ?>
+        <?php foreach ($users as $user): ?>
         <tr>
-            <td><?= htmlspecialchars($user[0]) ?></td>
-            <td><?= htmlspecialchars($user[1]) ?></td>
+            <td><?= htmlspecialchars($user['name']) ?></td>
+            <td><?= htmlspecialchars($user['email']) ?></td>
             <td>
-                <a href="edit.php?edit=<?= $index ?>">edit</a> |
-                <a href="?delete=<?= $index ?>" onclick="return confirm('are you sure?')">delete</a>
+                <a href="edit.php?edit=<?= $user['id'] ?>">edit</a> |
+                <a href="?delete=<?= $user['id'] ?>" onclick="return confirm('are you sure?')">delete</a>
             </td>
         </tr>
         <?php endforeach; ?>

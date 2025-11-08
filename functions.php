@@ -1,46 +1,33 @@
 <?php
-$file = "users.txt";
+$host = 'localhost';
+$dbname = 'user_db';
+$username = 'root';
+$password = '';
 
-function getUsers($file) {
-    $users = [];
-    if (file_exists($file)) {
-        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($lines as $line) {
-            $parts = explode("|", $line);
-            if (count($parts) == 2) {
-                $users[] = $parts;
-            }
-        }
-    }
-    return $users;
+$pdo = null;
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("connection failed: " . $e->getMessage());
 }
 
-function saveUsers($file, $users) {
-    $lines = [];
-    foreach ($users as $user) {
-        $lines[] = implode("|", $user);
-    }
-    file_put_contents($file, implode("\n", $lines) . "\n");
+function getUsers($pdo) {
+    $stmt = $pdo->query("SELECT id, name, email FROM users ORDER BY id");
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function addUser($file, $name, $email) {
-    $users = getUsers($file);
-    $users[] = [$name, $email];
-    saveUsers($file, $users);
+function addUser($pdo, $name, $email) {
+    $stmt = $pdo->prepare("INSERT INTO users (name, email) VALUES (?, ?)");
+    $stmt->execute([$name, $email]);
 }
 
-function editUser($file, $index, $name, $email) {
-    $users = getUsers($file);
-    if (isset($users[$index])) {
-        $users[$index] = [$name, $email];
-        saveUsers($file, $users);
-    }
+function editUser($pdo, $id, $name, $email) {
+    $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
+    $stmt->execute([$name, $email, $id]);
 }
 
-function deleteUser($file, $index) {
-    $users = getUsers($file);
-    if (isset($users[$index])) {
-        unset($users[$index]);
-        saveUsers($file, array_values($users));
-    }
+function deleteUser($pdo, $id) {
+    $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+    $stmt->execute([$id]);
 }
