@@ -1,40 +1,45 @@
 <?php
 include 'functions.php';
+
+if (isset($_GET['delete'])) {
+    $delete_index = (int)$_GET['delete'];
+    deleteUser($file, $delete_index);
+    header("Location: index.php");
+    exit;
+}
+
 $users = getUsers($file);
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title>User Manager</title>
+    <title>user manager</title>
 </head>
 <body>
-
-<h3>User List</h3>
-
+<h3>user list</h3>
 <table border="1" cellpadding="8" cellspacing="0">
     <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Action</th>
+        <th>name</th>
+        <th>email</th>
+        <th>actions</th>
     </tr>
-
-    <?php foreach($users as $index => $user): ?>
-    <tr>
-        <td><?= htmlspecialchars($user[0]) ?></td>
-        <td><?= htmlspecialchars($user[1]) ?></td>
-        <td>
-            <a href="edit_form.php?edit=<?= $index ?>">Edit</a> | 
-            <a href="delete.php?index=<?= $index ?>" onclick="return confirm('Are you sure?')">Delete</a>
-        </td>
-    </tr>
-    <?php endforeach; ?>
+    <?php if (empty($users)): ?>
+        <tr><td colspan="3">no users found.</td></tr>
+    <?php else: ?>
+        <?php foreach ($users as $index => $user): ?>
+        <tr>
+            <td><?= htmlspecialchars($user[0]) ?></td>
+            <td><?= htmlspecialchars($user[1]) ?></td>
+            <td>
+                <a href="edit.php?edit=<?= $index ?>">edit</a> |
+                <a href="?delete=<?= $index ?>" onclick="return confirm('are you sure?')">delete</a>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </table>
-
 <br><br>
-
-<a href="add_form.php"><button>Add New User</button></a>
-
+<a href="add.php"><button>add new user</button></a>
 </body>
 </html>
